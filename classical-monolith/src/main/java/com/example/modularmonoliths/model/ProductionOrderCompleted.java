@@ -3,6 +3,7 @@ package com.example.modularmonoliths.model;
 import java.util.UUID;
 
 import com.example.modularmonoliths.common.event.DomainEvent;
+import com.example.modularmonoliths.common.type.Quantity;
 import com.example.modularmonoliths.model.Product.ProductIdentifier;
 
 import lombok.Builder;
@@ -20,6 +21,6 @@ public class ProductionOrderCompleted implements DomainEvent {
     ProductIdentifier productIdentifier;
 
     @NonNull
-    Integer producedQuantity;
+    Quantity producedQuantity;
 
 }

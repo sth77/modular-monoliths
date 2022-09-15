@@ -112,7 +112,7 @@ class ProductionOrderController implements RepresentationModelProcessor<EntityMo
             model.add(linkTo(methodOn(getClass()).accept(order.getId(), null)).withRel(REL_ACCEPT));
         }
         if (order.getState() == ProductionOrderState.ACCEPTED) {
-            model.add(linkTo(methodOn(getClass()).accept(order.getId(), null)).withRel(REL_COMPLETE));
+            model.add(linkTo(methodOn(getClass()).complete(order.getId())).withRel(REL_COMPLETE));
         }
         return model.add(linkTo(methodOn(getClass()).findOne(order.getId())).withSelfRel());
     }

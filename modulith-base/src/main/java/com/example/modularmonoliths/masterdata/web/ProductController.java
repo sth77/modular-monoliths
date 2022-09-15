@@ -4,10 +4,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.UUID;
-import java.util.function.UnaryOperator;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.modularmonoliths.common.log.LogPrefix;
 import com.example.modularmonoliths.masterdata.Product;
-import com.example.modularmonoliths.masterdata.Product.ProductIdentifier;
 import com.example.modularmonoliths.masterdata.Product.ProductState;
 import com.example.modularmonoliths.masterdata.Products;
 
@@ -51,7 +50,9 @@ class ProductController implements RepresentationModelProcessor<EntityModel<Prod
 
         val result = Product.create(request.getName());
         products.save(result);
-        return ResponseEntity.ok(EntityModel.of(result));
+        return ResponseEntity
+        		.created(getSelfLink(result).toUri())
+        		.body(EntityModel.of(result));
     }
 
     @GetMapping("/{id}")
@@ -69,36 +70,41 @@ class ProductController implements RepresentationModelProcessor<EntityModel<Prod
     }
 
     @PostMapping("/{id}/rename")
-    ResponseEntity<?> rename(@PathVariable ProductIdentifier id, @RequestBody RenameRequest request) {
+    ResponseEntity<?> rename(@PathVariable("id") Product product, @RequestBody RenameRequest request) {
         log.info("{} {}", LogPrefix.INCOMING, request);
 
-        return updateProduct(id, it -> it.rename(request.getNewName()));
+        return saveAndConvertToResponse(
+        		product.rename(request.getNewName()));
     }
 
     @PostMapping("/{id}/discontinue")
-    ResponseEntity<?> discontinue(@PathVariable ProductIdentifier id, DiscontinueRequest request) {
+    ResponseEntity<?> discontinue(@PathVariable("id") Product product, DiscontinueRequest request) {
         log.info("{} {}", LogPrefix.INCOMING, request);
 
-        return updateProduct(id, Product::discontinue);
+        return saveAndConvertToResponse(
+        		product.discontinue());
     }
-
-    private ResponseEntity<?> updateProduct(ProductIdentifier productId, UnaryOperator<Product> action) {
-        return products.findById(productId.uuidValue())
-                .map(action::apply)
-                .map(products::save)
-                .map(ResponseEntity.ok()::body)
-                .orElse(ResponseEntity.notFound().build());
+    
+    ResponseEntity<?> saveAndConvertToResponse(Product product) {
+    	return ResponseEntity.ok(
+    			EntityModel.of(
+    					products.save(product)));
+    	
     }
 
     @Override
     public EntityModel<Product> process(EntityModel<Product> model) {
         val product = model.getContent();
-        model.add(linkTo(methodOn(getClass()).findOne(product.getId().uuidValue())).withSelfRel());
+        model.add(getSelfLink(product));
         if (product.getState() == ProductState.ACTIVE) {
-            model.add(linkTo(methodOn(getClass()).rename(product.getId(), null)).withRel(REL_RENAME));
-            model.add(linkTo(methodOn(getClass()).discontinue(product.getId(), null)).withRel(REL_DISCONTINUE));
+            model.add(linkTo(methodOn(getClass()).rename(product, null)).withRel(REL_RENAME));
+            model.add(linkTo(methodOn(getClass()).discontinue(product, null)).withRel(REL_DISCONTINUE));
         }
         return model;
+    }
+    
+    private Link getSelfLink(Product product) {
+    	return linkTo(methodOn(getClass()).findOne(product.getId())).withSelfRel();
     }
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})

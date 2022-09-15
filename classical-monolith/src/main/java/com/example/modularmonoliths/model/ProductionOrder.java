@@ -120,6 +120,7 @@ public class ProductionOrder extends AbstractAggregateRoot<ProductionOrder> {
 		registerEvent(ProductionOrderCompleted.builder()
 				.productionOrderId(id)
 				.productIdentifier(product.getId())
+				.producedQuantity(Quantity.of(quantityToProduce))
 				.build());
 		return this;
 	}

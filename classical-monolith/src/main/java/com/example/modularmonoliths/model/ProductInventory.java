@@ -16,26 +16,26 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.val;
 
 @Entity
 @Table(name="product_inventory")
 @Getter
-@RequiredArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@EqualsAndHashCode(of = "productId", callSuper = false)
 public class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
 
     private static final LocalDateTime MIN_DATE = LocalDateTime.of(2000, 1, 1, 0, 0);
 
     @Id
     @Column(name = "product_id")
-    private final UUID productId;
+    private UUID productId;
 
     @Version
     @Column(name = "version")
@@ -64,8 +64,9 @@ public class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
     }
 
     public static ProductInventory createFor(Product product) {
-        val result = new ProductInventory(product.getId().uuidValue());
+        val result = new ProductInventory();
 
+        result.productId = product.getId().uuidValue();
         result.productName = product.getName();
         result.currentQuantity = 0;
         result.notificationThreshold = 0;

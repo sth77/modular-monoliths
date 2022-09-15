@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/productInventories")
 @RequiredArgsConstructor
 class ProductInventoryController {
- 
+
     static final String RESOURCE_REL = "productInventories";
 
     private final ProductInventories productInventories;

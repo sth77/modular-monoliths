@@ -13,7 +13,6 @@ import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import com.example.modularmonoliths.common.exception.BusinessException;
 import com.example.modularmonoliths.common.type.Quantity;
 import com.example.modularmonoliths.masterdata.Product;
-import com.example.modularmonoliths.masterdata.Product.ProductIdentifier;
 import com.example.modularmonoliths.productionorder.event.ProductionOrderCompleted;
 
 import lombok.Getter;
@@ -54,7 +53,7 @@ public class ProductionOrder extends AbstractAggregateRoot<ProductionOrder> {
 		result.id = UUID.randomUUID();
 		result.name = name;
 		result.state = ProductionOrderState.DRAFT;
-		result.product = product.getId();
+		result.product = AggregateReference.to(product.getId());
 		result.quantityToProduce = quantityToProduce.intValue();
 		return result;
 	}
@@ -96,7 +95,8 @@ public class ProductionOrder extends AbstractAggregateRoot<ProductionOrder> {
 		effectiveCompletionDate = LocalDate.now();
 		registerEvent(ProductionOrderCompleted.builder()
 				.productionOrderId(id)
-				.productIdentifier(ProductIdentifier.of(product.getId()))
+				.productId(product.getId())
+				.producedQuantity(Quantity.of(quantityToProduce))
 				.build());
 		return this;
 	}

@@ -2,6 +2,7 @@ package com.example.modularmonoliths.productionorder.event;
 
 import org.jmolecules.event.types.DomainEvent;
 
+import com.example.modularmonoliths.common.type.Quantity;
 import com.example.modularmonoliths.masterdata.Product.ProductIdentifier;
 import com.example.modularmonoliths.productionorder.ProductionOrder.ProductionOrderIdentifier;
 
@@ -20,6 +21,6 @@ public class ProductionOrderCompleted implements DomainEvent {
     ProductIdentifier productId;
 
     @NonNull
-    Integer producedQuantity;
+    Quantity producedQuantity;
 
 }

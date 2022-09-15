@@ -11,7 +11,6 @@ import com.example.modularmonoliths.common.event.DomainEvent;
 import com.example.modularmonoliths.common.type.Principal;
 import com.example.modularmonoliths.common.type.Source;
 import com.example.modularmonoliths.masterdata.Product;
-import com.example.modularmonoliths.masterdata.Product.ProductIdentifier;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,7 +22,7 @@ import lombok.val;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
+public class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
 
     private static final LocalDateTime MIN_DATE = LocalDateTime.of(2000, 1, 1, 0, 0);
 
@@ -40,12 +39,8 @@ class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
     private LocalDateTime lastReplenished;
     private LocalDateTime lastConsumed;
 
-    ProductIdentifier getProductId() {
-        return ProductIdentifier.of(productId);
-    }
-
     static ProductInventory createFor(Product product) {
-        val result = new ProductInventory(product.getId().uuidValue());
+        val result = new ProductInventory(product.getId());
 
         result.productName = product.getName();
         result.currentQuantity = 0;
@@ -86,7 +81,7 @@ class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
         currentQuantity = currentQuantity + value;
         lastReplenished = LocalDateTime.now();
         registerEvent(ProductInventoryReplenished.builder()
-                .productId(ProductIdentifier.of(productId))
+                .productId(productId)
                 .replenishedQuantity(value)
                 .newQuantity(currentQuantity)
                 .source(source)
@@ -146,7 +141,7 @@ class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
 
     public interface ProductInventoryEvent extends DomainEvent {
 
-        ProductIdentifier getProductId();
+        UUID getProductId();
 
     }
 
@@ -154,7 +149,7 @@ class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
     public static class ProductInventoryCreated implements ProductInventoryEvent {
 
         @NonNull
-        ProductIdentifier productId;
+        UUID productId;
 
     }
 
@@ -163,7 +158,7 @@ class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
     public static class ProductInventoryReplenished implements ProductInventoryEvent {
 
         @NonNull
-        ProductIdentifier productId;
+        UUID productId;
 
         @NonNull
         Integer replenishedQuantity;
@@ -182,7 +177,7 @@ class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
     public static class ProductInventoryConsumed implements ProductInventoryEvent {
 
         @NonNull
-        ProductIdentifier productId;
+        UUID productId;
 
         @NonNull
         Integer consumedQuantity;
@@ -201,7 +196,7 @@ class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
     public static class ProductInventoryCorrected implements ProductInventoryEvent {
 
         @NonNull
-        ProductIdentifier productId;
+        UUID productId;
 
         @NonNull
         Integer oldQuantity;
@@ -219,7 +214,7 @@ class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
     public static class ProductInventoryThresholdUnderrun implements ProductInventoryEvent {
 
         @NonNull
-        ProductIdentifier productId;
+        UUID productId;
 
         @NonNull
         Integer currentQuantity;
@@ -234,7 +229,7 @@ class ProductInventory extends AbstractAggregateRoot<ProductInventory> {
     public static class ProductInventoryEmptied implements ProductInventoryEvent {
 
         @NonNull
-        ProductIdentifier productId;
+        UUID productId;
 
         @NonNull
         Integer currentQuantity;

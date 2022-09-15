@@ -98,6 +98,7 @@ public class ProductionOrder extends AbstractAggregate<ProductionOrder, Producti
 		effectiveCompletionDate = LocalDate.now();
 		registerEvent(ProductionOrderCompleted.builder()
 				.productionOrderId(id)
+				.producedQuantity(Quantity.of(quantityToProduce))
 				.productId(product.getId()).build());
 		return this;
 	}

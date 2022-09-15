@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 
 // @SpringBootApplication
 @Modulith
-class ModulithWithModulithsLibApplication {
+public class ModulithWithModulithsLibApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ModulithWithModulithsLibApplication.class, args);

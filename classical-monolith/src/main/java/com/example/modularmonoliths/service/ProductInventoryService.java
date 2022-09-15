@@ -26,7 +26,7 @@ class ProductInventoryService {
         val inventory = productInventories.findById(event.getProductIdentifier().uuidValue())
                 .orElseGet(() -> this.createInventory(event.getProductIdentifier()));
         productInventories.save(inventory.replenish(
-                event.getProducedQuantity(),
+                event.getProducedQuantity().intValue(),
                 Source.of("ProductionOrder " + event.getProductionOrderId())));
     }
 

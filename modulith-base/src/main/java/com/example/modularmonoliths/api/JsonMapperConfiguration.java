@@ -24,7 +24,7 @@ class JsonMapperConfiguration {
     public static final ZoneId ZUERICH = ZoneId.of("Europe/Zurich");
 
     @Bean
-    public Jackson2ObjectMapperBuilder objectMapperBuilder() {
+    Jackson2ObjectMapperBuilder objectMapperBuilder() {
         val builder = new Jackson2ObjectMapperBuilder();
         builder.visibility(PropertyAccessor.FIELD, Visibility.ANY);
         builder.annotationIntrospector(new PojoBuilderAnnotationsIntrospector());

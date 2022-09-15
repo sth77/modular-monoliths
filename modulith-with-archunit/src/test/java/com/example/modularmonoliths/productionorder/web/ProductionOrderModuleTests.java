@@ -1,4 +1,4 @@
-package com.example.modularmonoliths.productionorder;
+package com.example.modularmonoliths.productionorder.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.endsWith;
@@ -20,7 +20,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.example.modularmonoliths.common.type.Quantity;
 import com.example.modularmonoliths.masterdata.Product;
 import com.example.modularmonoliths.masterdata.Products;
+import com.example.modularmonoliths.productionorder.ProductionOrder;
 import com.example.modularmonoliths.productionorder.ProductionOrder.ProductionOrderState;
+import com.example.modularmonoliths.productionorder.ProductionOrders;
 
 import lombok.val;
 
@@ -29,7 +31,7 @@ import lombok.val;
 class ProductionOrderModuleTests {
 
 	@Autowired
-	MockMvc mvc;
+	MockMvc mockMvc;
 
 	@Autowired
 	ProductionOrders productionOrders;
@@ -57,27 +59,25 @@ class ProductionOrderModuleTests {
 		productionOrders.save(productionOrder2);
 
 		// act
-		mvc.perform(MockMvcRequestBuilders.get("/api/productionOrders").contentType(MediaType.APPLICATION_JSON_VALUE))
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/productionOrders").contentType(MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded['productionOrders']", Matchers.hasSize(2)));
 	}
 
 	@Test
 	public void createOrder() throws Exception {
-		val body = """
-				    {
-				        "name": "Test-Order",
-				        "productIdentifier": "pid",
-				        "quantityToProduce": 5
-				    }
-				""".replace("pid", product1.getId().uuidValue().toString());
 		productionOrders.deleteAll();
 		
 		// act
-		mvc.perform(post("/api/productionOrders")
+		mockMvc.perform(post("/api/products/" + product1.getId() + "/createOrder")
 				.contentType("application/json")
-				.content(body))
-				.andExpect(status().isOk())
+				.content("""
+				    {
+				        "orderName": "Test-Order",
+				        "quantityToProduce": 5
+				    }
+				"""))
+				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$._links['self']").exists())
 				.andExpect(jsonPath("$._links['submit'].href").value(endsWith("/submit")))
 				.andExpect(jsonPath("$._links['accept']").doesNotExist());
@@ -87,7 +87,7 @@ class ProductionOrderModuleTests {
 			.hasSize(1)
 			.first()
 				.hasFieldOrPropertyWithValue("name", "Test-Order")
-				.hasFieldOrPropertyWithValue("product", AggregateReference.to(product1.getId().uuidValue()))
+				.hasFieldOrPropertyWithValue("product", AggregateReference.to(product1.getId()))
 				.hasFieldOrPropertyWithValue("quantityToProduce", Quantity.of(5))
 				.hasFieldOrPropertyWithValue("state", ProductionOrderState.DRAFT);
 

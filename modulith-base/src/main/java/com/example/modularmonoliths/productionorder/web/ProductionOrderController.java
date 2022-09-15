@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.modularmonoliths.common.exception.EntityNotFoundException;
 import com.example.modularmonoliths.common.type.Quantity;
-import com.example.modularmonoliths.masterdata.Product.ProductIdentifier;
+import com.example.modularmonoliths.masterdata.Product;
 import com.example.modularmonoliths.productionorder.ProductionOrder;
 import com.example.modularmonoliths.productionorder.ProductionOrder.ProductionOrderState;
 import com.example.modularmonoliths.productionorder.ProductionOrderService;
@@ -51,8 +52,7 @@ class ProductionOrderController implements RepresentationModelProcessor<EntityMo
     @GetMapping
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(
-                CollectionModel.wrap(productionOrders.findAll())
-                        .add(linkTo(methodOn(getClass()).create(null)).withRel(REL_CREATE)));
+                CollectionModel.wrap(productionOrders.findAll()));
     }
 
     @GetMapping("/{id}")
@@ -61,12 +61,15 @@ class ProductionOrderController implements RepresentationModelProcessor<EntityMo
                 EntityModel.of(productionOrders.findById(id)));
     }
 
-    @PostMapping
-    public ResponseEntity<?> create(@RequestBody CreateRequest request) {
-        return ResponseEntity.ok().body(EntityModel.of(productionOrderService.createOrder(
-                request.getName(),
-                request.getProductIdentifier(),
-                request.getQuantityToProduce())));
+    @PostMapping(value = "/api/products/{id}/createOrder")
+    public ResponseEntity<?> create(@PathVariable("id") Product product, @RequestBody CreateRequest request) {
+    	val order = productionOrderService.createOrder(
+        		product,
+                request.getOrderName(),
+                request.getQuantityToProduce());
+        return ResponseEntity
+        		.created(getSelfLink(order).toUri())
+        		.body(EntityModel.of(order));
     }
 
     @PostMapping("/{id}/rename")
@@ -112,9 +115,13 @@ class ProductionOrderController implements RepresentationModelProcessor<EntityMo
             model.add(linkTo(methodOn(getClass()).accept(order.getId(), null)).withRel(REL_ACCEPT));
         }
         if (order.getState() == ProductionOrderState.ACCEPTED) {
-            model.add(linkTo(methodOn(getClass()).accept(order.getId(), null)).withRel(REL_COMPLETE));
+            model.add(linkTo(methodOn(getClass()).complete(order.getId())).withRel(REL_COMPLETE));
         }
-        return model.add(linkTo(methodOn(getClass()).findOne(order.getId())).withSelfRel());
+        return model.add(getSelfLink(order));
+    }
+    
+    private Link getSelfLink(ProductionOrder order) {
+    	return linkTo(methodOn(getClass()).findOne(order.getId())).withSelfRel();
     }
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
@@ -130,8 +137,7 @@ class ProductionOrderController implements RepresentationModelProcessor<EntityMo
     @Value
     static class CreateRequest {
 
-        @NonNull String name;
-        @NonNull ProductIdentifier productIdentifier;
+        @NonNull String orderName;
         @NonNull Quantity quantityToProduce;
     }
 
