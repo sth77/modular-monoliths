@@ -9,13 +9,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.moduliths.test.ModuleTest;
-import org.moduliths.test.ModuleTest.BootstrapMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jdbc.core.mapping.AggregateReference;
 import org.springframework.http.MediaType;
+import org.springframework.modulith.test.ApplicationModuleTest;
+import org.springframework.modulith.test.ApplicationModuleTest.BootstrapMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -30,7 +30,7 @@ import lombok.val;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ModuleTest(mode = BootstrapMode.DIRECT_DEPENDENCIES)
+@ApplicationModuleTest(mode = BootstrapMode.DIRECT_DEPENDENCIES)
 class ProductionOrderModuleTests {
 
 	@Autowired

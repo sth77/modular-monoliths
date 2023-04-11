@@ -1,2 +1,2 @@
-@org.moduliths.NamedInterface("common.event")
+@org.springframework.modulith.NamedInterface("common.event")
 package com.example.modularmonoliths.common.event;

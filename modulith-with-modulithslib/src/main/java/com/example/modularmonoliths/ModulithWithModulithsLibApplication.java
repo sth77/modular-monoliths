@@ -1,7 +1,7 @@
 package com.example.modularmonoliths;
 
-import org.moduliths.Modulith;
 import org.springframework.boot.SpringApplication;
+import org.springframework.modulith.Modulith;
 
 // @SpringBootApplication
 @Modulith
