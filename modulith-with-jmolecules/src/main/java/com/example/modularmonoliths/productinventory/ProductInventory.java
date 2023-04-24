@@ -11,6 +11,7 @@ import com.example.modularmonoliths.common.type.Source;
 import com.example.modularmonoliths.masterdata.Product;
 import com.example.modularmonoliths.masterdata.Product.ProductIdentifier;
 
+import jakarta.persistence.EmbeddedId;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class ProductInventory extends AbstractAggregate<ProductInventory, Produc
 
     private static final LocalDateTime MIN_DATE = LocalDateTime.of(2000, 1, 1, 0, 0);
 
+    @EmbeddedId
     private final ProductIdentifier productId;
 
     @Version

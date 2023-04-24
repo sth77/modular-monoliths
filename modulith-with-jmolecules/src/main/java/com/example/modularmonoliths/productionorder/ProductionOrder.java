@@ -5,12 +5,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Association;
 import org.jmolecules.ddd.types.Identifier;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.domain.AbstractAggregateRoot;
 
 import com.example.modularmonoliths.common.exception.BusinessException;
-import com.example.modularmonoliths.common.type.AbstractAggregate;
 import com.example.modularmonoliths.common.type.Quantity;
 import com.example.modularmonoliths.masterdata.Product;
 import com.example.modularmonoliths.masterdata.Product.ProductIdentifier;
@@ -19,13 +20,15 @@ import com.example.modularmonoliths.productionorder.event.ProductionOrderComplet
 
 import jakarta.persistence.Column;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.val;
 
 @Getter
-public class ProductionOrder extends AbstractAggregate<ProductionOrder, ProductionOrderIdentifier> {
+@RequiredArgsConstructor
+public class ProductionOrder extends AbstractAggregateRoot<ProductionOrder> implements AggregateRoot<ProductionOrder, ProductionOrderIdentifier> {
 
-	private ProductionOrderIdentifier id;
+	private final ProductionOrderIdentifier id;
 	@Version
 	private Integer version;
 	private String name;
@@ -52,8 +55,7 @@ public class ProductionOrder extends AbstractAggregate<ProductionOrder, Producti
 		if (quantityToProduce.intValue() <= 0) {
 			throw new BusinessException("Quantity must be positive, but was " + quantityToProduce.intValue());
 		}
-		val result = new ProductionOrder();
-		result.id = ProductionOrderIdentifier.random();
+		val result = new ProductionOrder(ProductionOrderIdentifier.random());
 		result.name = name;
 		result.state = ProductionOrderState.DRAFT;
 		result.product = Association.forAggregate(product);

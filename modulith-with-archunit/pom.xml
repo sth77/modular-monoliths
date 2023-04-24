@@ -7,7 +7,7 @@
 		<artifactId>parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>monolith-with-archunit</artifactId>
+	<artifactId>modulith-with-archunit</artifactId>
 	<description>Modulith using Arch Unit to enforce onion architecture and module dependencies.</description>
 	<properties>
 		<java.version>17</java.version>

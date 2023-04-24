@@ -21,11 +21,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.modularmonoliths.common.exception.EntityNotFoundException;
 import com.example.modularmonoliths.common.type.Quantity;
-import com.example.modularmonoliths.masterdata.Product.ProductIdentifier;
 import com.example.modularmonoliths.productionorder.ProductionOrder;
 import com.example.modularmonoliths.productionorder.ProductionOrder.ProductionOrderIdentifier;
 import com.example.modularmonoliths.productionorder.ProductionOrder.ProductionOrderState;
-import com.example.modularmonoliths.productionorder.ProductionOrderService;
 import com.example.modularmonoliths.productionorder.ProductionOrders;
 
 import lombok.NonNull;
@@ -36,7 +34,7 @@ import lombok.val;
 @RestController
 @RequestMapping("/api/productionOrders")
 @RequiredArgsConstructor
-class ProductionOrderController implements RepresentationModelProcessor<EntityModel<ProductionOrder>> {
+public class ProductionOrderController implements RepresentationModelProcessor<EntityModel<ProductionOrder>> {
 
     static final String RESOURCE_REL = "productionOrders";
     static final String REL_CREATE = "create";
@@ -46,27 +44,17 @@ class ProductionOrderController implements RepresentationModelProcessor<EntityMo
     static final String REL_COMPLETE = "complete";
 
     private final ProductionOrders productionOrders;
-    private final ProductionOrderService productionOrderService;
 
     @GetMapping
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok(
-                CollectionModel.wrap(productionOrders.findAll())
-                        .add(linkTo(methodOn(getClass()).create(null)).withRel(REL_CREATE)));
+                CollectionModel.wrap(productionOrders.findAll()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findOne(@PathVariable("id") ProductionOrderIdentifier id) {
         return ResponseEntity.ok(
                 EntityModel.of(productionOrders.findById(id)));
-    }
-
-    @PostMapping
-    public ResponseEntity<?> create(@RequestBody CreateRequest request) {
-        return ResponseEntity.ok().body(EntityModel.of(productionOrderService.createOrder(
-                request.getName(),
-                request.getProductIdentifier(),
-                request.getQuantityToProduce())));
     }
 
     @PostMapping("/{id}/rename")
@@ -130,8 +118,7 @@ class ProductionOrderController implements RepresentationModelProcessor<EntityMo
     @Value
     static class CreateRequest {
 
-        @NonNull String name;
-        @NonNull ProductIdentifier productIdentifier;
+        @NonNull String orderName;
         @NonNull Quantity quantityToProduce;
     }
 

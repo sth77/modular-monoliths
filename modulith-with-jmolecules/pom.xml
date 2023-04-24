@@ -8,12 +8,14 @@
 		<artifactId>parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>monolith-with-jmolecules</artifactId>
+	<artifactId>modulith-with-jmolecules</artifactId>
 	<description>Modulith implementation using jMolecules.</description>
 	<properties>
 		<java.version>17</java.version>
 		<jmolecules-bom.version>2022.2.4</jmolecules-bom.version>
-		<jqassistant.version>1.12.0</jqassistant.version>
+		<bytebuddy.version>1.14.3</bytebuddy.version>
+		<jqassistant.version>1.11.1</jqassistant.version>
+		<hibernate.version>6.2.0.Final</hibernate.version>
 		<archunit.version>1.0.1</archunit.version>
 	</properties>
 	<dependencyManagement>
@@ -25,16 +27,26 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
+			<!-- Custom version overrides -->
+			<dependency>
+				<groupId>org.hibernate.orm</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
+		<!-- jMolecules -->
 		<dependency>
-			<groupId>org.jmolecules</groupId>
-			<artifactId>jmolecules-ddd</artifactId>
+			<groupId>org.jmolecules.integrations</groupId>
+			<artifactId>jmolecules-starter-ddd</artifactId>
 		</dependency>
+
+		<!-- jMolecules integrations -->
 		<dependency>
-			<groupId>org.jmolecules</groupId>
-			<artifactId>jmolecules-events</artifactId>
+			<groupId>org.jmolecules.integrations</groupId>
+			<artifactId>jmolecules-spring</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jmolecules</groupId>
@@ -42,7 +54,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jmolecules.integrations</groupId>
-			<artifactId>jmolecules-spring</artifactId>
+			<artifactId>jmolecules-jpa</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jmolecules.integrations</groupId>
@@ -51,27 +64,36 @@
 		<dependency>
 			<groupId>org.jmolecules.integrations</groupId>
 			<artifactId>jmolecules-archunit</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>com.tngtech.archunit</groupId>
-		    <artifactId>archunit-junit5</artifactId>
-		    <version>${archunit.version}</version>
-		    <scope>test</scope>
-		</dependency>		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jmolecules.integrations</groupId>
-			<artifactId>jmolecules-jpa</artifactId>
+			<artifactId>jmolecules-bytebuddy-nodep</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit-junit5</artifactId>
+			<version>${archunit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hibernate.orm</groupId>
+					<artifactId>hibernate-core-jakarta</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>jakarta.persistence</groupId>
-			<artifactId>jakarta.persistence-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -81,18 +103,6 @@
 	</dependencies>
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>com.buschmais.jqassistant</groupId>
 				<artifactId>jqassistant-maven-plugin</artifactId>
@@ -124,20 +134,17 @@
 			<plugin>
 				<groupId>net.bytebuddy</groupId>
 				<artifactId>byte-buddy-maven-plugin</artifactId>
+				<version>${bytebuddy.version}</version>
 				<executions>
 					<execution>
 						<goals>
-							<goal>transform</goal>
+							<goal>transform-extended</goal>
 						</goals>
 					</execution>
 				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.jmolecules.integrations</groupId>
-						<artifactId>jmolecules-bytebuddy</artifactId>
-						<version>0.15.0</version>
-					</dependency>
-				</dependencies>
+				<configuration>
+					<classPathDiscovery>true</classPathDiscovery>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

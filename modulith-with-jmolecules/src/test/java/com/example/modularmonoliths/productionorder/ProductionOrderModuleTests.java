@@ -29,7 +29,7 @@ import lombok.val;
 class ProductionOrderModuleTests {
 
 	@Autowired
-	MockMvc mvc;
+	MockMvc mockMvc;
 
 	@Autowired
 	ProductionOrders productionOrders;
@@ -57,27 +57,25 @@ class ProductionOrderModuleTests {
 		productionOrders.save(productionOrder2);
 
 		// act & assert
-		mvc.perform(MockMvcRequestBuilders.get("/api/productionOrders").contentType(MediaType.APPLICATION_JSON_VALUE))
+		mockMvc.perform(MockMvcRequestBuilders.get("/api/productionOrders").contentType(MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded['productionOrders']", Matchers.hasSize(2)));
 	}
 
 	@Test
 	public void createOrder() throws Exception {
-		val body = """
-				    {
-				        "name": "Test-Order",
-				        "productIdentifier": "pid",
-				        "quantityToProduce": 5
-				    }
-				""".replace("pid", product1.getId().toString());
 		productionOrders.deleteAll();
 		
 		// act
-		mvc.perform(post("/api/productionOrders")
+		mockMvc.perform(post("/api/products/" + product1.getId().stringValue() + "/createOrder")
 				.contentType("application/json")
-				.content(body))
-				.andExpect(status().isOk())
+				.content("""
+				    {
+				        "orderName": "Test-Order",
+				        "quantityToProduce": 5
+				    }
+				"""))
+				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$._links['self']").exists())
 				.andExpect(jsonPath("$._links['submit'].href").value(endsWith("/submit")))
 				.andExpect(jsonPath("$._links['accept']").doesNotExist());

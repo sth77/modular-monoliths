@@ -2,15 +2,14 @@ package com.example.modularmonoliths.masterdata;
 
 import java.util.UUID;
 
+import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Identifier;
 import org.jmolecules.event.types.DomainEvent;
-import org.springframework.data.annotation.Version;
+import org.springframework.data.domain.AbstractAggregateRoot;
 
-import com.example.modularmonoliths.common.type.AbstractAggregate;
 import com.example.modularmonoliths.masterdata.Product.ProductIdentifier;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,11 +17,10 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.val;
-import lombok.experimental.Accessors;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class Product extends AbstractAggregate<Product, ProductIdentifier> {
+public class Product extends AbstractAggregateRoot<Product> implements AggregateRoot<Product, ProductIdentifier> {
 
     private final ProductIdentifier id;
 
@@ -32,7 +30,7 @@ public class Product extends AbstractAggregate<Product, ProductIdentifier> {
     private String name;
 
     private ProductState state = ProductState.ACTIVE;
-
+    
     public static Product create(String name) {
         val id = ProductIdentifier.random();
         val result = new Product(id);
@@ -59,27 +57,12 @@ public class Product extends AbstractAggregate<Product, ProductIdentifier> {
 
     // --------------------------------------------------------------------------------------------
 
-    @Value(staticConstructor = "of")
-    @Accessors(fluent = true)
-    public static class ProductIdentifier implements Identifier {
-
-    	@NonNull 
-    	@Column(name = "id")
-    	String stringValue;
+    public record ProductIdentifier(String stringValue) implements Identifier {
     	
-    	@JsonCreator
-    	ProductIdentifier(String stringValue) {
-    		this.stringValue = stringValue;
-    	}
-    	
-        public static ProductIdentifier random() {
-			return ProductIdentifier.of(UUID.randomUUID().toString());
+    	public static ProductIdentifier random() {
+			return new ProductIdentifier(UUID.randomUUID().toString());
 		}
-
-		@Override
-        public String toString() {
-            return stringValue;
-        }
+    	    
     }
 
     @Value
