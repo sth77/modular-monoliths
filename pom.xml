@@ -20,7 +20,7 @@
 		<module>classical-monolith</module>
 		<module>modulith-base</module>
 		<module>modulith-with-archunit</module>
-		<module>modulith-with-modulithslib</module>
+		<module>modulith-with-spring-modulith</module>
 		<module>modulith-with-jmolecules</module>
 	</modules>
 	<dependencies>

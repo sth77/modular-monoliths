@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.jmolecules.ddd.types.Repository;
-import org.jmolecules.spring.AssociationResolver;
+import org.jmolecules.ddd.integration.AssociationResolver;
 
 import com.example.modularmonoliths.productionorder.ProductionOrder.ProductionOrderIdentifier;
 
